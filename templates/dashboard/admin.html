@@ -1,0 +1,40 @@
+{{define "content"}}
+<div class="page-header">
+  <h1>Administration</h1>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="quick-links">
+      <a href="/zones" class="quick-link">
+        {{icon "globe"}}
+        <div>
+          <strong>All Zones</strong>
+          <span class="text-muted">{{.Data.ZoneCount}} zones</span>
+        </div>
+      </a>
+      <a href="/admin/customers" class="quick-link">
+        {{icon "users"}}
+        <div>
+          <strong>Customers</strong>
+          <span class="text-muted">{{.Data.CustomerCount}} customers</span>
+        </div>
+      </a>
+      <a href="/admin/zones/new" class="quick-link">
+        {{icon "plus"}}
+        <div>
+          <strong>Create Zone</strong>
+          <span class="text-muted">Add a new DNS zone</span>
+        </div>
+      </a>
+      <a href="/zones" class="quick-link">
+        {{icon "globe"}}
+        <div>
+          <strong>Assign Zones</strong>
+          <span class="text-muted">Assign zones to customers</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+{{end}}

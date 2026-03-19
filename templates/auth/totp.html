@@ -1,0 +1,21 @@
+{{define "content"}}
+<div class="container-narrow">
+    <div class="auth-form">
+        <div class="card">
+            <div class="card-body">
+                <h1>Two-Factor Authentication</h1>
+                {{if .Data}}<div class="error">{{.Data}}</div>{{end}}
+                <p>Enter the 6-digit code from your authenticator app.</p>
+                <form method="POST" action="/login/totp">
+                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                    <div class="form-group">
+                        <label for="code">Code</label>
+                        <input type="text" id="code" name="code" class="form-control" inputmode="numeric" pattern="[0-9]{6}" maxlength="6" autocomplete="one-time-code" required autofocus>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Verify</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

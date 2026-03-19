@@ -1,0 +1,47 @@
+{{define "content"}}
+<div class="page-header">
+    <h1>Customers</h1>
+    <a href="/admin/customers/new" class="btn btn-primary">{{icon "plus"}} Add Customer</a>
+</div>
+{{if .Data}}
+<div class="card">
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Email</th>
+                    <th>Notes</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Data}}
+                <tr>
+                    <td><a href="/admin/customers/{{.ID}}">{{.Name}}</a></td>
+                    <td>{{.Email}}</td>
+                    <td>{{.Notes}}</td>
+                    <td>
+                        <a href="/admin/customers/{{.ID}}/edit" class="btn btn-sm">Edit</a>
+                        <form method="POST" action="/admin/customers/{{.ID}}/delete" class="inline">
+                            <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this customer?')">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+</div>
+{{else}}
+<div class="card">
+    <div class="card-body">
+        <div class="empty-state">
+            <p>No customers found.</p>
+            <a href="/admin/customers/new" class="btn btn-primary">{{icon "plus"}} Add Customer</a>
+        </div>
+    </div>
+</div>
+{{end}}
+{{end}}

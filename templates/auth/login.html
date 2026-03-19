@@ -1,0 +1,27 @@
+{{define "content"}}
+<div class="container-narrow">
+    <div class="auth-form">
+        <div class="card">
+            <div class="card-body">
+                <h1>Login</h1>
+                {{if .Data}}<div class="error">{{.Data}}</div>{{end}}
+                <form method="POST" action="/login">
+                    <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                    <div class="form-group">
+                        <label for="email">Email</label>
+                        <input type="email" id="email" name="email" class="form-control" required autofocus>
+                    </div>
+                    <div class="form-group">
+                        <label for="password">Password</label>
+                        <input type="password" id="password" name="password" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn-primary">{{icon "log-out"}} Login</button>
+                </form>
+                {{if .MailEnabled}}
+                <p style="margin-top: 1rem;"><a href="/forgot-password">Forgot password?</a></p>
+                {{end}}
+            </div>
+        </div>
+    </div>
+</div>
+{{end}}

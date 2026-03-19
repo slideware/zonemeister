@@ -1,0 +1,48 @@
+{{if .Data.Zone.RRsets}}
+<table class="table records-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>TTL</th>
+            <th>Content</th>
+            <th class="actions-col">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{$zoneID := .Data.Zone.ID}}
+        {{$zoneName := .Data.Zone.Name}}
+        {{$csrf := .CSRFToken}}
+        {{range .Data.Zone.RRsets}}
+        {{$name := .Name}}
+        {{$type := .Type}}
+        <tr>
+            <td>{{label .Name $zoneName}}</td>
+            <td><span class="badge badge-{{.Type}}">{{.Type}}</span></td>
+            <td>{{if .TTL}}{{deref .TTL}}{{else}}-{{end}}</td>
+            <td>
+                {{range .Records}}
+                <div class="record-content{{if .Disabled}} record-disabled{{end}}">
+                    <span>{{.Content}}</span>
+                    <form class="inline-form" hx-post="/zones/{{$zoneID}}/records/delete" hx-target="#records-table" hx-swap="innerHTML" hx-confirm="Delete this {{$type}} record: {{.Content}}?">
+                        <input type="hidden" name="name" value="{{$name}}">
+                        <input type="hidden" name="type" value="{{$type}}">
+                        <input type="hidden" name="content" value="{{.Content}}">
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                </div>
+                {{end}}
+            </td>
+            <td class="actions-col">
+                <button class="btn btn-sm"
+                    hx-get="/zones/{{$zoneID}}/records/edit?name={{.Name}}&type={{.Type}}"
+                    hx-target="closest tr"
+                    hx-swap="outerHTML">Edit</button>
+            </td>
+        </tr>
+        {{end}}
+    </tbody>
+</table>
+{{else}}
+<p>No DNS records found for this zone.</p>
+{{end}}

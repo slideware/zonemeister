@@ -1,0 +1,293 @@
+{{define "content"}}
+<div class="breadcrumb"><a href="/zones">Zones</a><span class="separator">&rarr;</span><span>{{.Data.Zone.Name}}</span></div>
+
+<div class="page-header">
+    <h1>{{.Data.Zone.Name}}</h1>
+    <p class="zone-meta">Serial: {{.Data.Zone.NotifiedSerial}}</p>
+    {{if .User.IsSuperAdmin}}
+    <div class="btn-group">
+        <form method="POST" action="/admin/zones/{{.Data.Zone.ID}}/notify">
+            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+            <button type="submit" class="btn btn-sm">Send NOTIFY</button>
+        </form>
+        <a href="/admin/zones/{{.Data.Zone.ID}}/export" class="btn btn-sm">Export BIND</a>
+        <form method="POST" action="/admin/zones/{{.Data.Zone.ID}}/delete">
+            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this zone?')">Delete Zone</button>
+        </form>
+    </div>
+    {{end}}
+</div>
+
+<div id="record-form-error"></div>
+
+<div class="card">
+    <div class="card-header">Add Record</div>
+    <div class="card-body">
+        <form hx-post="/zones/{{.Data.Zone.ID}}/records" hx-target="#records-table" hx-swap="innerHTML" class="record-add-form">
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="add-name">Name</label>
+                    <input type="text" id="add-name" name="name" placeholder="@ or www" class="form-control">
+                    <span class="form-hint form-hint-mono">.{{.Data.Zone.Name}}</span>
+                </div>
+                <div class="form-group">
+                    <label for="add-type">Type</label>
+                    <select id="add-type" name="type" class="form-control" onchange="toggleRecordFields(this.value)">
+                        {{range .Data.RecordTypes}}
+                        <option value="{{.}}">{{.}}</option>
+                        {{end}}
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label for="add-ttl">TTL</label>
+                    <input type="number" id="add-ttl" name="ttl" value="3600" min="0" class="form-control">
+                </div>
+                <!-- Default: single content field -->
+                <div class="form-group form-group-grow" data-fields="default">
+                    <label>Content</label>
+                    <input type="text" name="content" placeholder="1.2.3.4" class="form-control">
+                </div>
+                <!-- MX: priority + hostname -->
+                <div class="form-group" data-fields="MX" style="display:none">
+                    <label>Priority</label>
+                    <input type="number" name="mx_priority" value="10" min="0" class="form-control" disabled>
+                </div>
+                <div class="form-group form-group-grow" data-fields="MX" style="display:none">
+                    <label>Hostname</label>
+                    <input type="text" name="mx_hostname" placeholder="mail.example.com" class="form-control" disabled>
+                </div>
+                <!-- SRV: priority + weight + port + target -->
+                <div class="form-group" data-fields="SRV" style="display:none">
+                    <label>Priority</label>
+                    <input type="number" name="srv_priority" value="0" min="0" class="form-control" disabled>
+                </div>
+                <div class="form-group" data-fields="SRV" style="display:none">
+                    <label>Weight</label>
+                    <input type="number" name="srv_weight" value="0" min="0" class="form-control" disabled>
+                </div>
+                <div class="form-group" data-fields="SRV" style="display:none">
+                    <label>Port</label>
+                    <input type="number" name="srv_port" min="0" class="form-control" disabled>
+                </div>
+                <div class="form-group form-group-grow" data-fields="SRV" style="display:none">
+                    <label>Target</label>
+                    <input type="text" name="srv_target" placeholder="sip.example.com" class="form-control" disabled>
+                </div>
+                <!-- CAA: flag + tag + value -->
+                <div class="form-group" data-fields="CAA" style="display:none">
+                    <label>Flag</label>
+                    <input type="number" name="caa_flag" value="0" min="0" max="255" class="form-control" disabled>
+                </div>
+                <div class="form-group" data-fields="CAA" style="display:none">
+                    <label>Tag</label>
+                    <select name="caa_tag" class="form-control" disabled>
+                        <option value="issue">issue</option>
+                        <option value="issuewild">issuewild</option>
+                        <option value="iodef">iodef</option>
+                    </select>
+                </div>
+                <div class="form-group form-group-grow" data-fields="CAA" style="display:none">
+                    <label>Value</label>
+                    <input type="text" name="caa_value" placeholder="letsencrypt.org" class="form-control" disabled>
+                </div>
+                <div class="form-group form-group-btn">
+                    <button type="submit" class="btn btn-primary">Add</button>
+                </div>
+            </div>
+            <script>
+            function toggleRecordFields(type) {
+                var form = document.querySelector('.record-add-form');
+                form.querySelectorAll('[data-fields]').forEach(function(el) {
+                    el.style.display = 'none';
+                    el.querySelectorAll('input,select').forEach(function(inp) { inp.disabled = true; });
+                });
+                var sel = '[data-fields="' + type + '"]';
+                var matched = form.querySelectorAll(sel);
+                if (matched.length === 0) sel = '[data-fields="default"]';
+                form.querySelectorAll(sel).forEach(function(el) {
+                    el.style.display = '';
+                    el.querySelectorAll('input,select').forEach(function(inp) { inp.disabled = false; });
+                });
+            }
+            </script>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">DNS Records</div>
+    <div class="card-body">
+        <div id="records-table">
+            {{template "records-table-inner" .}}
+        </div>
+    </div>
+</div>
+
+{{if .User.IsSuperAdmin}}
+<div class="card">
+    <div class="card-header">DynDNS</div>
+    <div class="card-body">
+        <div id="dyndns-section" hx-get="/admin/zones/{{.Data.Zone.ID}}/dyndns" hx-trigger="load" hx-swap="innerHTML">
+            Loading...
+        </div>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">ACME DNS-01</div>
+    <div class="card-body">
+        <div id="acme-section" hx-get="/admin/zones/{{.Data.Zone.ID}}/acme" hx-trigger="load" hx-swap="innerHTML">
+            Loading...
+        </div>
+    </div>
+</div>
+{{end}}
+
+<script>
+// Allow htmx to swap 422 responses (validation errors use HX-Retarget).
+document.body.addEventListener('htmx:beforeSwap', function(evt) {
+    if (evt.detail.xhr.status === 422) {
+        evt.detail.shouldSwap = true;
+        evt.detail.isError = false;
+    }
+});
+// Clear error message on successful responses.
+document.body.addEventListener('htmx:afterSwap', function(evt) {
+    if (evt.detail.xhr.status >= 200 && evt.detail.xhr.status < 300) {
+        var errDiv = document.getElementById('record-form-error');
+        if (errDiv) { errDiv.textContent = ''; errDiv.className = ''; }
+    }
+});
+// Client-side validation for record forms (add and edit).
+document.body.addEventListener('htmx:configRequest', function(evt) {
+    var elt = evt.detail.elt;
+    // Only validate record add/update POSTs.
+    var url = evt.detail.path || '';
+    if (url.indexOf('/records') === -1) return;
+    if (url.indexOf('/records/delete') !== -1) return;
+    if (evt.detail.verb !== 'post') return;
+
+    // Find the context: either the add form or the edit row (tr).
+    var container = elt.closest('.record-add-form') || elt.closest('tr');
+    if (!container) return;
+
+    var typeEl = container.querySelector('[name="type"]');
+    if (!typeEl) return;
+    var type = typeEl.value;
+
+    var err = validateRecordFields(type, container);
+    if (err) {
+        evt.preventDefault();
+        var errDiv = document.getElementById('record-form-error');
+        if (errDiv) { errDiv.textContent = err; errDiv.className = 'error'; }
+    }
+});
+
+function validateRecordFields(type, ctx) {
+    var val = function(name) {
+        var el = ctx.querySelector('[name="' + name + '"]:not([disabled])');
+        return el ? el.value.trim() : '';
+    };
+    var numVal = function(name) {
+        var v = val(name);
+        return v === '' ? NaN : Number(v);
+    };
+
+    switch (type) {
+    case 'A':
+        var ip = val('content');
+        if (!ip) return 'Content is required.';
+        if (!/^\d{1,3}\.\d{1,3}\.\d{1,3}\.\d{1,3}$/.test(ip)) return 'Invalid IPv4 address.';
+        var parts = ip.split('.').map(Number);
+        for (var i = 0; i < parts.length; i++) { if (parts[i] > 255) return 'Invalid IPv4 address (octet > 255).'; }
+        break;
+    case 'AAAA':
+        var ip6 = val('content');
+        if (!ip6) return 'Content is required.';
+        if (ip6.indexOf(':') === -1) return 'Invalid IPv6 address.';
+        break;
+    case 'MX':
+        var mxPri = numVal('mx_priority');
+        if (isNaN(mxPri) || mxPri < 0) return 'Priority must be a non-negative number.';
+        if (!val('mx_hostname')) return 'Hostname is required.';
+        if (!/^[a-zA-Z0-9._-]+$/.test(val('mx_hostname'))) return 'Invalid hostname.';
+        break;
+    case 'SRV':
+        var srvPri = numVal('srv_priority');
+        var srvWt = numVal('srv_weight');
+        var srvPort = numVal('srv_port');
+        if (isNaN(srvPri) || srvPri < 0) return 'Priority must be a non-negative number.';
+        if (isNaN(srvWt) || srvWt < 0) return 'Weight must be a non-negative number.';
+        if (isNaN(srvPort) || srvPort < 0 || srvPort > 65535) return 'Port must be 0\u201365535.';
+        if (!val('srv_target')) return 'Target is required.';
+        break;
+    case 'CAA':
+        if (!val('caa_value')) return 'Value is required.';
+        break;
+    case 'CNAME':
+    case 'NS':
+    case 'PTR':
+    case 'ALIAS':
+        var h = val('content');
+        if (!h) return 'Content is required.';
+        if (!/^[a-zA-Z0-9._-]+\.?$/.test(h)) return 'Invalid hostname.';
+        break;
+    default:
+        if (!val('content')) return 'Content is required.';
+    }
+    return null;
+}
+</script>
+{{end}}
+
+{{define "records-table-inner"}}
+{{if .Data.Zone.RRsets}}
+<table class="table records-table">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>TTL</th>
+            <th>Content</th>
+            <th class="actions-col">Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {{$zoneID := .Data.Zone.ID}}
+        {{$zoneName := .Data.Zone.Name}}
+        {{$csrf := .CSRFToken}}
+        {{range .Data.Zone.RRsets}}
+        {{$name := .Name}}
+        {{$type := .Type}}
+        <tr>
+            <td>{{label .Name $zoneName}}</td>
+            <td><span class="badge badge-{{.Type}}">{{.Type}}</span></td>
+            <td>{{if .TTL}}{{deref .TTL}}{{else}}-{{end}}</td>
+            <td>
+                {{range .Records}}
+                <div class="record-content{{if .Disabled}} record-disabled{{end}}">
+                    <span>{{.Content}}</span>
+                    <form class="inline-form" hx-post="/zones/{{$zoneID}}/records/delete" hx-target="#records-table" hx-swap="innerHTML" hx-confirm="Delete this {{$type}} record: {{.Content}}?">
+                        <input type="hidden" name="name" value="{{$name}}">
+                        <input type="hidden" name="type" value="{{$type}}">
+                        <input type="hidden" name="content" value="{{.Content}}">
+                        <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                    </form>
+                </div>
+                {{end}}
+            </td>
+            <td class="actions-col">
+                <button class="btn btn-sm"
+                    hx-get="/zones/{{$zoneID}}/records/edit?name={{.Name}}&type={{.Type}}"
+                    hx-target="closest tr"
+                    hx-swap="outerHTML">Edit</button>
+            </td>
+        </tr>
+        {{end}}
+    </tbody>
+</table>
+{{else}}
+<p>No DNS records found for this zone.</p>
+{{end}}
+{{end}}

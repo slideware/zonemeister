@@ -1,0 +1,35 @@
+{{define "content"}}
+<div class="breadcrumb"><a href="/zones">Zones</a><span class="separator">&rarr;</span><span>Create</span></div>
+
+<div class="page-header">
+    <h1>Create Zone</h1>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <form method="POST" action="/admin/zones">
+            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+            <div class="form-group">
+                <label for="name">Zone Name</label>
+                <input type="text" id="name" name="name" placeholder="example.com." required class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="also_notify">Also Notify IPs <small>(one IP per line)</small></label>
+                <textarea id="also_notify" name="also_notify" rows="4" class="form-control" placeholder="1.2.3.4&#10;5.6.7.8"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="allow_transfer_keys">Allow Transfer Keys <small>(one key per line)</small></label>
+                <textarea id="allow_transfer_keys" name="allow_transfer_keys" rows="4" class="form-control"></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Create Zone</button>
+                <a href="/zones" class="btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{{end}}

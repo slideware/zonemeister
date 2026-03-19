@@ -1,0 +1,26 @@
+{{define "content"}}
+<div class="page-header">
+  <h1>Dashboard</h1>
+</div>
+
+<div class="card">
+  <div class="card-body">
+    <div class="quick-links">
+      <a href="/zones" class="quick-link">
+        {{icon "globe"}}
+        <div>
+          <strong>My Zones</strong>
+          <span class="text-muted">{{.Data.ZoneCount}} zones</span>
+        </div>
+      </a>
+      <a href="/account" class="quick-link">
+        {{icon "settings"}}
+        <div>
+          <strong>Account Settings</strong>
+          <span class="text-muted">Password, 2FA</span>
+        </div>
+      </a>
+    </div>
+  </div>
+</div>
+{{end}}

@@ -1,0 +1,92 @@
+<tr>
+    <td>
+        <input type="hidden" name="name" value="{{.Data.RRset.Name}}">
+        {{label .Data.RRset.Name .Data.ZoneName}}
+    </td>
+    <td>
+        <input type="hidden" name="type" value="{{.Data.RRset.Type}}">
+        <span class="badge badge-{{.Data.RRset.Type}}">{{.Data.RRset.Type}}</span>
+    </td>
+    <td>
+        <label class="field-label">TTL</label>
+        <input type="number" name="ttl" value="{{if .Data.RRset.TTL}}{{deref .Data.RRset.TTL}}{{else}}3600{{end}}" min="0" class="form-control form-control-sm">
+    </td>
+    <td>
+        {{if eq .Data.RRset.Type "MX"}}
+            {{range .Data.RRset.Records}}
+            <div class="edit-record-row form-row">
+                <div class="inline-field" style="width:80px;flex-shrink:0">
+                    <label class="field-label">Priority</label>
+                    <input type="number" name="mx_priority" value="{{field .Content 0}}" min="0" class="form-control form-control-sm" required>
+                </div>
+                <div class="inline-field" style="flex:1">
+                    <label class="field-label">Hostname</label>
+                    <input type="text" name="mx_hostname" value="{{field .Content 1}}" class="form-control form-control-sm" required>
+                </div>
+            </div>
+            {{end}}
+        {{else if eq .Data.RRset.Type "SRV"}}
+            {{range .Data.RRset.Records}}
+            <div class="edit-record-row form-row">
+                <div class="inline-field" style="width:70px;flex-shrink:0">
+                    <label class="field-label">Priority</label>
+                    <input type="number" name="srv_priority" value="{{field .Content 0}}" min="0" class="form-control form-control-sm" required>
+                </div>
+                <div class="inline-field" style="width:70px;flex-shrink:0">
+                    <label class="field-label">Weight</label>
+                    <input type="number" name="srv_weight" value="{{field .Content 1}}" min="0" class="form-control form-control-sm" required>
+                </div>
+                <div class="inline-field" style="width:80px;flex-shrink:0">
+                    <label class="field-label">Port</label>
+                    <input type="number" name="srv_port" value="{{field .Content 2}}" min="0" class="form-control form-control-sm" required>
+                </div>
+                <div class="inline-field" style="flex:1">
+                    <label class="field-label">Target</label>
+                    <input type="text" name="srv_target" value="{{field .Content 3}}" class="form-control form-control-sm" required>
+                </div>
+            </div>
+            {{end}}
+        {{else if eq .Data.RRset.Type "CAA"}}
+            {{range .Data.RRset.Records}}
+            <div class="edit-record-row form-row">
+                <div class="inline-field" style="width:60px;flex-shrink:0">
+                    <label class="field-label">Flag</label>
+                    <input type="number" name="caa_flag" value="{{field .Content 0}}" min="0" max="255" class="form-control form-control-sm" required>
+                </div>
+                <div class="inline-field" style="width:110px;flex-shrink:0">
+                    <label class="field-label">Tag</label>
+                    <select name="caa_tag" class="form-control form-control-sm">
+                        <option value="issue"{{if eq (field .Content 1) "issue"}} selected{{end}}>issue</option>
+                        <option value="issuewild"{{if eq (field .Content 1) "issuewild"}} selected{{end}}>issuewild</option>
+                        <option value="iodef"{{if eq (field .Content 1) "iodef"}} selected{{end}}>iodef</option>
+                    </select>
+                </div>
+                <div class="inline-field" style="flex:1">
+                    <label class="field-label">Value</label>
+                    <input type="text" name="caa_value" value="{{fieldFrom .Content 2}}" class="form-control form-control-sm" required>
+                </div>
+            </div>
+            {{end}}
+        {{else}}
+            <label class="field-label">Content</label>
+            {{range .Data.RRset.Records}}
+            <div class="edit-record-row">
+                <input type="text" name="content" value="{{.Content}}" class="form-control form-control-sm" required>
+            </div>
+            {{end}}
+        {{end}}
+    </td>
+    <td class="actions-col">
+        <div class="btn-group">
+            <button type="button" class="btn btn-sm btn-primary"
+                hx-post="/zones/{{.Data.ZoneID}}/records/update"
+                hx-include="closest tr"
+                hx-target="#records-table"
+                hx-swap="innerHTML">Save</button>
+            <button type="button" class="btn btn-sm btn-secondary"
+                hx-get="/zones/{{.Data.ZoneID}}/records"
+                hx-target="#records-table"
+                hx-swap="innerHTML">Cancel</button>
+        </div>
+    </td>
+</tr>

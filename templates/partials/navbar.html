@@ -1,0 +1,57 @@
+{{define "navbar"}}
+<nav class="navbar">
+    <div class="navbar-inner">
+        <a href="/" class="nav-brand">
+            <img src="/static/img/logo.svg" alt="Zonemeister" height="28">
+        </a>
+
+        <button class="hamburger" aria-label="Menu" aria-expanded="false">
+            {{icon "menu"}}
+        </button>
+
+        <div class="nav-links">
+            {{if .User}}
+                <a href="/zones" class="nav-link">{{icon "globe"}} Zones</a>
+
+                {{if .User.IsSuperAdmin}}
+                <div class="dropdown">
+                    <button class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+                        {{icon "users"}} Customers {{icon "chevron-down"}}
+                    </button>
+                    <div class="dropdown-menu" role="menu">
+                        <a href="/admin/customers" class="dropdown-item" role="menuitem">{{icon "users"}} List Customers</a>
+                        <a href="/admin/customers/new" class="dropdown-item" role="menuitem">{{icon "plus"}} Add Customer</a>
+                    </div>
+                </div>
+
+                <div class="dropdown">
+                    <button class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+                        {{icon "shield"}} Admin {{icon "chevron-down"}}
+                    </button>
+                    <div class="dropdown-menu" role="menu">
+                        <a href="/admin/zones/new" class="dropdown-item" role="menuitem">{{icon "plus"}} Create Zone</a>
+                    </div>
+                </div>
+                {{end}}
+
+                <div class="nav-spacer"></div>
+                <div class="dropdown">
+                    <button class="nav-link dropdown-toggle" aria-haspopup="true" aria-expanded="false">
+                        {{icon "settings"}} {{.User.Email}} {{icon "chevron-down"}}
+                    </button>
+                    <div class="dropdown-menu dropdown-menu-right" role="menu">
+                        <a href="/account" class="dropdown-item" role="menuitem">{{icon "settings"}} Account</a>
+                        <form method="POST" action="/logout" class="dropdown-item">
+                            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+                            <button type="submit" class="dropdown-btn" role="menuitem">{{icon "log-out"}} Logout</button>
+                        </form>
+                    </div>
+                </div>
+            {{else}}
+                <div class="nav-spacer"></div>
+                <a href="/login" class="nav-link">Login</a>
+            {{end}}
+        </div>
+    </div>
+</nav>
+{{end}}

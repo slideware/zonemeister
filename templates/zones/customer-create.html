@@ -1,0 +1,50 @@
+{{define "content"}}
+<div class="breadcrumb"><a href="/zones">Zones</a><span class="separator">&rarr;</span><span>Create</span></div>
+
+<div class="page-header">
+    <h1>Create Zone</h1>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h2>New Zone</h2>
+        <form method="POST" action="/zones">
+            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+            <div class="form-group">
+                <label for="name">Zone Name</label>
+                <input type="text" id="name" name="name" placeholder="example.com." required class="form-control">
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Create Zone</button>
+                <a href="/zones" class="btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        <h2>Import from BIND Zone File</h2>
+        <form method="POST" action="/zones/import">
+            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+            <div class="form-group">
+                <label for="import-name">Zone Name</label>
+                <input type="text" id="import-name" name="name" placeholder="example.com." required class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="zonefile">Zone File Content</label>
+                <textarea id="zonefile" name="zonefile" rows="12" class="form-control" required placeholder="$ORIGIN example.com.&#10;$TTL 3600&#10;@ IN A 1.2.3.4&#10;www IN CNAME @"></textarea>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Import Zone</button>
+                <a href="/zones" class="btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{{end}}

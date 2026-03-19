@@ -1,0 +1,70 @@
+{{define "content"}}
+<div class="breadcrumb">
+    <a href="/admin/customers">Customers</a>
+    <span class="separator">&rarr;</span>
+    <span>{{if .Data.IsEdit}}Edit{{else}}New{{end}}</span>
+</div>
+<div class="page-header">
+    <h1>{{if .Data.IsEdit}}Edit Customer{{else}}New Customer{{end}}</h1>
+</div>
+<div class="card">
+    <div class="card-header">Customer Information</div>
+    <div class="card-body">
+        <form method="POST" action="{{if .Data.IsEdit}}/admin/customers/{{.Data.Customer.ID}}{{else}}/admin/customers{{end}}">
+            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" name="name" value="{{.Data.Customer.Name}}" required class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="customer_email">Email</label>
+                <input type="email" id="customer_email" name="customer_email" value="{{.Data.Customer.Email}}" required class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="notes">Notes</label>
+                <textarea id="notes" name="notes" class="form-control">{{.Data.Customer.Notes}}</textarea>
+            </div>
+
+            {{if .Data.TSIGKeys}}
+            <div class="form-group">
+                <label>TSIG Keys</label>
+                {{range .Data.TSIGKeys}}
+                <div class="form-check">
+                    <input type="checkbox" name="tsig_keys" value="{{.Name}}"
+                        id="tsig-{{.Name}}"
+                        {{if index $.Data.SelectedKeys .Name}}checked{{end}}
+                        class="form-check-input">
+                    <label for="tsig-{{.Name}}" class="form-check-label">
+                        {{.Name}}
+                    </label>
+                </div>
+                {{end}}
+            </div>
+            {{end}}
+
+            {{if not .Data.IsEdit}}
+            <hr>
+            <h3>First User Account</h3>
+
+            <div class="form-group">
+                <label for="user_email">User Email</label>
+                <input type="email" id="user_email" name="user_email" required class="form-control">
+            </div>
+
+            <div class="form-group">
+                <label for="password">Password</label>
+                <input type="password" id="password" name="password" required class="form-control">
+            </div>
+            {{end}}
+
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">{{if .Data.IsEdit}}Save Changes{{else}}Create Customer{{end}}</button>
+                <a href="/admin/customers" class="btn">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+{{end}}

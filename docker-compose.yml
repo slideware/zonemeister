@@ -1,0 +1,33 @@
+services:
+  zonemeister:
+    image: ghcr.io/slideware/zonemeister:latest
+    build: .
+    ports:
+      - "3000:3000"
+    volumes:
+      - data:/data
+    environment:
+      SERVER_HOST: "0.0.0.0"
+      DB_PATH: "/data/zonemeister.db"
+      SESSION_SECRET: "${SESSION_SECRET:?Set SESSION_SECRET}"
+      NETNOD_API_URL: "https://primarydnsapi.netnod.se"
+      NETNOD_API_TOKEN: "${NETNOD_API_TOKEN:?Set NETNOD_API_TOKEN}"
+
+  postgres:
+    image: postgres:17-alpine
+    profiles: ["postgres"]
+    environment:
+      POSTGRES_DB: zonemeister
+      POSTGRES_USER: zonemeister
+      POSTGRES_PASSWORD: zonemeister
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U zonemeister"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+volumes:
+  data:
+  pgdata:

@@ -1,0 +1,9 @@
+.git
+.github
+bin/
+data/
+*.db
+.env
+.env.*
+docs/
+.claude/

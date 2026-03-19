@@ -1,0 +1,125 @@
+{{define "content"}}
+<div class="breadcrumb">
+    <a href="/admin/customers">Customers</a>
+    <span class="separator">&rarr;</span>
+    <span>{{.Data.Customer.Name}}</span>
+</div>
+
+<div class="page-header">
+    <h1>{{.Data.Customer.Name}}</h1>
+    <div class="btn-group">
+        <a href="/admin/customers/{{.Data.Customer.ID}}/edit" class="btn btn-sm">Edit</a>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">Details</div>
+    <div class="card-body">
+        <table class="table">
+            <tr><th>Email</th><td>{{.Data.Customer.Email}}</td></tr>
+            <tr><th>Notes</th><td>{{.Data.Customer.Notes}}</td></tr>
+        </table>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">Users</div>
+    <div class="card-body">
+        {{if .Data.Users}}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Email</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Data.Users}}
+                <tr>
+                    <td>{{.Email}}</td>
+                    <td>
+                        <form method="POST" action="/admin/customers/{{$.Data.Customer.ID}}/users/password" class="inline">
+                            <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+                            <input type="hidden" name="user_id" value="{{.ID}}">
+                            <input type="password" name="password" placeholder="New password" required class="form-control form-control-sm" style="width: 12em; display: inline-block;">
+                            <button type="submit" class="btn btn-sm">Set Password</button>
+                        </form>
+                        <form method="POST" action="/admin/customers/{{$.Data.Customer.ID}}/users/delete" class="inline">
+                            <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+                            <input type="hidden" name="user_id" value="{{.ID}}">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Delete this user?')">Delete</button>
+                        </form>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+        {{else}}
+        <p>No users.</p>
+        {{end}}
+
+        <form method="POST" action="/admin/customers/{{.Data.Customer.ID}}/users" style="margin-top: 1rem;">
+            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+            <h4>Add User</h4>
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="new-user-email">Email</label>
+                    <input type="email" id="new-user-email" name="email" required class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="new-user-password">Password</label>
+                    <input type="password" id="new-user-password" name="password" required class="form-control">
+                </div>
+                <div class="form-group" style="align-self: flex-end;">
+                    <button type="submit" class="btn btn-primary btn-sm">Add User</button>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">TSIG Keys</div>
+    <div class="card-body">
+        {{if .Data.TSIGKeys}}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Key Name</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Data.TSIGKeys}}
+                <tr>
+                    <td>{{.}}</td>
+                    <td>
+                        <form method="POST" action="/admin/customers/{{$.Data.Customer.ID}}/tsig/delete" class="inline">
+                            <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+                            <input type="hidden" name="tsig_key_name" value="{{.}}">
+                            <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Remove this TSIG key?')">Remove</button>
+                        </form>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+        {{else}}
+        <p>No TSIG keys assigned.</p>
+        {{end}}
+
+        {{if .Data.AvailableKeys}}
+        <form method="POST" action="/admin/customers/{{.Data.Customer.ID}}/tsig" class="form-inline" style="margin-top: 1rem;">
+            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+            <select name="tsig_key_name" class="form-control" required>
+                <option value="">Select a TSIG key...</option>
+                {{range .Data.AvailableKeys}}
+                <option value="{{.Name}}">{{.Name}}</option>
+                {{end}}
+            </select>
+            <button type="submit" class="btn btn-primary btn-sm">Add TSIG Key</button>
+        </form>
+        {{end}}
+    </div>
+</div>
+{{end}}

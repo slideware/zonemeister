@@ -1,0 +1,66 @@
+{{define "content"}}
+<div class="breadcrumb"><a href="/zones">Zones</a><span class="separator">&rarr;</span><span>Assign: {{.Data.ZoneName}}</span></div>
+
+<div class="page-header">
+    <h1>Assign Zone: {{.Data.ZoneName}}</h1>
+</div>
+
+<div class="card">
+    <div class="card-header">Current Assignments</div>
+    <div class="card-body">
+        {{if .Data.Assignments}}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Customer</th>
+                    <th>Assigned</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Data.Assignments}}
+                <tr>
+                    <td>{{if .Customer}}{{.Customer.Name}}{{else}}Unknown{{end}}</td>
+                    <td>{{.Assignment.AssignedAt.Format "2006-01-02 15:04"}}</td>
+                    <td>
+                        <form method="POST" action="/admin/zones/{{$.Data.ZoneID}}/unassign">
+                            <input type="hidden" name="csrf_token" value="{{$.CSRFToken}}">
+                            <input type="hidden" name="customer_id" value="{{.Assignment.CustomerID}}">
+                            <button type="submit" class="btn btn-danger btn-sm">Unassign</button>
+                        </form>
+                    </td>
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+        {{else}}
+        <p>No customers assigned to this zone.</p>
+        {{end}}
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">Assign to Customer</div>
+    <div class="card-body">
+        {{if .Data.Customers}}
+        <form method="POST" action="/admin/zones/{{.Data.ZoneID}}/assign">
+            <input type="hidden" name="csrf_token" value="{{.CSRFToken}}">
+            <div class="form-group">
+                <label for="customer_id">Customer</label>
+                <select id="customer_id" name="customer_id" class="form-control" required>
+                    <option value="">-- Select customer --</option>
+                    {{range .Data.Customers}}
+                    <option value="{{.ID}}">{{.Name}}</option>
+                    {{end}}
+                </select>
+            </div>
+            <div class="form-actions">
+                <button type="submit" class="btn btn-primary">Assign</button>
+            </div>
+        </form>
+        {{else}}
+        <p>No customers available.</p>
+        {{end}}
+    </div>
+</div>
+{{end}}

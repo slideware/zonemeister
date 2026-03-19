@@ -1,0 +1,30 @@
+{{define "base"}}<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Zonemeister</title>
+    <link rel="stylesheet" href="/static/css/main.css">
+    {{if .PartnerCSS}}<link rel="stylesheet" href="/static/css/partner.css">{{end}}
+    <script src="/static/js/htmx.min.js"></script>
+    <script src="/static/js/dropdown.js" defer></script>
+    <script>
+        document.addEventListener('htmx:configRequest', function(event) {
+            event.detail.headers['X-CSRF-Token'] = '{{.CSRFToken}}';
+        });
+    </script>
+</head>
+<body>
+    {{template "navbar" .}}
+    <main class="container">
+        {{if .Flash}}
+        <div class="flash flash-success">
+            {{icon "check-circle"}}
+            <span>{{.Flash}}</span>
+            <button class="flash-dismiss" onclick="this.parentElement.remove()">{{icon "x"}}</button>
+        </div>
+        {{end}}
+        {{template "content" .}}
+    </main>
+</body>
+</html>{{end}}

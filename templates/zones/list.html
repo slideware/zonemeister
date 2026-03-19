@@ -1,0 +1,53 @@
+{{define "content"}}
+<div class="page-header">
+    <h1>Zones</h1>
+    <div class="btn-group">
+        {{if .User.IsSuperAdmin}}
+        <a href="/zones{{if ne .Data.Filter "unassigned"}}?filter=unassigned{{end}}" class="btn btn-sm{{if eq .Data.Filter "unassigned"}} btn-primary{{end}}">
+            {{if eq .Data.Filter "unassigned"}}Show All{{else}}Unassigned Only{{end}}
+        </a>
+        <a href="/admin/zones/new" class="btn btn-sm btn-primary">{{icon "plus"}} Create Zone</a>
+        {{else}}
+        <a href="/zones/new" class="btn btn-sm btn-primary">{{icon "plus"}} Create Zone</a>
+        {{end}}
+    </div>
+</div>
+{{if .Data.Zones}}
+<div class="card">
+    <div class="card-body">
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    {{if .Data.IsSuperAdmin}}<th>Customer</th>{{end}}
+                    <th>Serial</th>
+                    {{if $.User.IsSuperAdmin}}<th></th>{{end}}
+                </tr>
+            </thead>
+            <tbody>
+                {{range .Data.Zones}}
+                <tr>
+                    <td><a href="/zones/{{.ID}}">{{.Name}}</a></td>
+                    {{if $.Data.IsSuperAdmin}}
+                    <td>
+                        {{if .Customer}}
+                        <a href="/admin/customers/{{.Customer.ID}}/edit">{{.Customer.Name}}</a>
+                        {{else}}
+                        <span class="text-muted">&mdash;</span>
+                        {{end}}
+                    </td>
+                    {{end}}
+                    <td>{{.NotifiedSerial}}</td>
+                    {{if $.User.IsSuperAdmin}}
+                    <td><a href="/admin/zones/{{.ID}}/assign" class="btn btn-sm">Assign</a></td>
+                    {{end}}
+                </tr>
+                {{end}}
+            </tbody>
+        </table>
+    </div>
+</div>
+{{else}}
+<div class="empty-state">{{icon "globe"}}<p>No zones found</p></div>
+{{end}}
+{{end}}
